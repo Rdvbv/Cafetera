@@ -15,6 +15,26 @@ end top_cafetera;
 
 architecture behavioral of top_cafetera is
 
+COMPONENT MaquinaDeEstados IS 
+        PORT(
+               boton_c,boton_l,reset, clk : in std_logic;
+	       --presente: in std_logic;
+               led_corto,led_largo,led_espera,led_listo : out std_logic;    
+        );
+ END COMPONENT;
+ 
+ COMPONENT contador
+	GENERIC (max:integer:=30);
+	PORT(
+		clk : IN std_logic;
+		rst : IN std_logic;
+		enable : IN std_logic;          
+		count : OUT std_logic_vector(4 downto 0);
+		salida : OUT std_logic
+		);
+	END COMPONENT;
+ 
+ 
 TYPE estado_type IS (espera,corto,largo,listo);
 SIGNAL state : estado_type;
 
@@ -25,51 +45,10 @@ signal estado_sel_in: std_logic;
 
 
 
-COMPONENT top_selection
-     PORT ( 
-     enable : IN std_logic;
-     reset: IN std_logic;
-     clk: IN std_logic;
-     selection: OUT std_logic_vector (3 DOWNTO 0);
-     salida_top: OUT bit;
-     sel_fin: OUT std_logic;
-     estado_sel: OUT std_logic
-);
-end COMPONENT;
-
-
 begin
 
-seleccion<=seleccion_in;
 
-Inst_top_selection: top_selection PORT MAP (enable => enable ,
-                                           reset=>reset_top, 
-                                           clk=>clock_top, 
-                                           selection=>seleccion_in,
-                                           sel_fin=>sel_fin
-                                            );
-contador:	COMPONENT contador
-	GENERIC (max:integer:=30);
-	PORT(
-		clk : IN std_logic;
-		rst : IN std_logic;
-		enable : IN std_logic;          
-		count : OUT std_logic_vector(4 downto 0);
-		salida : OUT std_logic
-		);
-	END COMPONENT;
- contador PORT MAP (clk=>clock_top,
-                    rst=>reset_top,
-                    enable=> enable,
-                    salida =>salida_top,
-                    );
-maquina: COMPONENT MaquinaDeEstados IS 
-        PORT(
-               boton_c,boton_l,reset, clk : in std_logic;
-	       --presente: in std_logic;
-               led_corto,led_largo,led_espera,led_listo : out std_logic;    
-        );
- MaquinaDeEstados PORT MAP (clk=>clock_top,
+maquina: MaquinaDeEstados PORT MAP (clk=>clock_top,
                     reset=>reset_top,
 		    clk=>clock;
 		    boton_c=>   ;
@@ -80,4 +59,12 @@ maquina: COMPONENT MaquinaDeEstados IS
 		    led_listo => ;
     
                     );
+
+
+contador: contador PORT MAP (clk=>clock_top,
+                    rst=>reset_top,
+                    enable=> enable,
+                    salida =>salida_top,
+                    );
+
 end Behavioral;
