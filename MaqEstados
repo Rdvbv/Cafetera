@@ -74,13 +74,18 @@ BEGIN
     END CASE;
 END process salida; 
 
+contador:
+PROCESS(clk)
+BEGIN
+IF clk='1' THEN
+IF rescont THEN cuenta<=0;
+ELSE cuenta<=cuenta+1;
+END IF;
+END IF;
+END PROCESS contador;
+-- Definicion de los tiempos(creo que esto iria en top)
+fin_largo<=true WHEN cuenta=30 ELSE false;
+fin_corto<=true WHEN cuenta=20 ELSE false;
 
-count: contador PORT_map(
-clk=>
-rst=>'0';
-enable=>
-count=>
-salida=>
-);
 
 END behavioral;
