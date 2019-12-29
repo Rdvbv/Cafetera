@@ -31,6 +31,7 @@ COMPONENT top_selection
      reset: IN std_logic;
      clk: IN std_logic;
      selection: OUT std_logic_vector (3 DOWNTO 0);
+     salida_top: OUT bit;
      sel_fin: OUT std_logic;
      estado_sel: OUT std_logic
 );
@@ -60,10 +61,23 @@ contador:	COMPONENT contador
  contador PORT MAP (clk=>clock_top,
                     rst=>reset_top,
                     enable=> enable,
-                    count=>    --- falta decir a que enganchamos
-                    salida =>
+                    salida =>salida_top,
                     );
-maquina: COMPONENT
-
-
+maquina: COMPONENT MaquinaDeEstados IS 
+        PORT(
+               boton_c,boton_l,reset, clk : in std_logic;
+	       --presente: in std_logic;
+               led_corto,led_largo,led_espera,led_listo : out std_logic;    
+        );
+ MaquinaDeEstados PORT MAP (clk=>clock_top,
+                    reset=>reset_top,
+		    clk=>clock;
+		    boton_c=>   ;
+		    boton_l=>    ;
+		    led_corto =>; 
+		    led_largo =>  ;
+		    led_espera => ;
+		    led_listo => ;
+    
+                    );
 end Behavioral;
