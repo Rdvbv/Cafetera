@@ -1,0 +1,76 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+
+
+entity MaqEstad is
+ PORT(boton_c,boton_l,reset,clk: IN std_logic;
+ led_corto,led_largo,led_espera,led_listo: OUT std_logic);
+ 
+end MaqEstad;
+
+architecture Behavioral of MaqEstad is
+TYPE estado IS (espera,preparando_c,preparando_l,listo);
+
+SIGNAL presente:estado:=espera;
+SIGNAL resetcont: boolean:=false; --Resetea contador
+SIGNAL fin_largo, fin_corto:boolean; --Indica el fin de la cuenta, para tipos de cafes.
+SIGNAL cuenta:integer RANGE 0 TO 29;
+
+
+begin
+maquina: 
+PROCESS(clk, reset)
+begin
+    IF reset='1' THEN
+        presente<=espera;
+    ELSE IF clk='1' AND clk'EVENT THEN
+        CASE presente IS
+            WHEN espera =>
+                IF boton_c='1' THEN
+                    presente<=preparando_c;
+                END IF;
+            WHEN preparando_c =>
+                IF fin_corto THEN
+                    presente<=listo;
+                END IF;
+            WHEN preparando_l =>
+                IF fin_largo THEN
+                    presente<=listo;
+                END IF;
+            WHEN listo =>
+                presente<= espera;
+        END CASE;
+    END IF;
+    END IF;
+end process;
+
+
+salida:
+process(presente)
+BEGIN
+    CASE presente IS
+        WHEN espera =>
+            led_espera<= '1';
+            led_corto<= '0';
+            led_largo<= '0';
+            led_listo<='0';
+            resetcont<=false;
+        WHEN preparando_c =>
+            led_espera<= '0';
+            led_corto<='1';
+            resetcont<=false;
+        WHEN preparando_l =>
+            led_espera<= '0';   
+            led_largo<='1';
+            resetcont<=false;
+        WHEN listo =>
+            led_espera<= '0';
+            led_corto<= '0';
+            led_largo<= '0';
+            led_listo<='1';
+            resetcont<=true;
+    END CASE;
+END process salida;          
+END behavioral;
