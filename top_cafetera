@@ -1,0 +1,60 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity top_cafetera is
+  Port (
+        enable: in std_logic;
+        reset_top: in std_logic;
+        clock_top: in std_logic;
+        seleccion: out std_logic_vector(4 downto 0)
+         );
+end top_cafetera;
+
+
+
+
+architecture behavioral of top_cafetera is
+
+TYPE estado_type IS (S0_INICIO, 
+                    S1_CORTO, S2_LARGO,
+                    S3_FIN
+                    );
+SIGNAL state, next_state: estado_type;
+
+signal seleccion_in: std_logic_vector(4 downto 0);
+signal servicio_in: std_logic_vector (4 downto 0);
+signal estado_sel_in: std_logic;
+
+
+
+
+COMPONENT top_selection
+     PORT ( 
+     enable : IN std_logic;
+     reset: IN std_logic;
+     clk_top: IN std_logic;
+     selection: OUT std_logic_vector (3 DOWNTO 0);
+     
+     display:        out STD_LOGIC_VECTOR(6 downto 0);       -- segmentos del display
+     cur_display:    out STD_LOGIC_VECTOR(7 downto 0);        -- habilitación de display
+     sel_fin: OUT std_logic;
+     estado_sel: OUT std_logic
+);
+end COMPONENT;
+
+
+begin
+
+seleccion<=seleccion_in;
+
+Inst_top_selection: top_selection PORT MAP (enable => enable ,
+                                           reset=>reset_top, 
+                                           clk_top=>clock_top, 
+                                           selection=>seleccion_in,
+                                           sel_fin=>sel_fin,
+                                           display=>display_sel_aux, 
+                                           cur_display=>cur_display_sel_aux
+                                            );
+
+
+end Behavioral;
