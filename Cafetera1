@@ -72,5 +72,15 @@ BEGIN
             led_listo<='1';
             resetcont<=true;
     END CASE;
-END process salida;          
+END process salida; 
+
+
+count: contador PORT_map(
+clk=>
+rst=>'0';
+enable=>
+count=>
+salida=>
+);
+
 END behavioral;
