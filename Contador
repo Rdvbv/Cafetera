@@ -2,16 +2,16 @@ use IEEE.NUMERIC_STD.ALL;
 
 
 entity counter is
-    generic (tope:integer:=10);
+    generic (tope:integer:=30);
     Port ( clk : in  STD_LOGIC;
            rst : in  STD_LOGIC;
            enable : in  STD_LOGIC;
-           count : out  STD_LOGIC_VECTOR (3 downto 0);
+           count : out  STD_LOGIC_VECTOR (4 downto 0);
            salida : out  STD_LOGIC);
 end counter;
 
 architecture Behavioral of counter is
-signal cnt: unsigned (3 downto 0);
+signal cnt: unsigned (4 downto 0);
 begin
 
 	process (clk, rst, enable)
