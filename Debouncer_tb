@@ -47,6 +47,21 @@ begin
   process
   begin
   
+  -- probamos reset
+  rst <='0';
+  wait 20 ms;
+  rst <= '1';
+  wait 20 ms;
+  
+  --probamos que pasa al activar y desactivar entrada
+  
+  btn_in <= '1';
+  wait 20 ms;
+  btn_in <= '0';
+  wait 20 ms;
+  --probamos con tiempo pequeño
+  btn_in <='1';
+  wait 5 ms;
    assert false
         report "Fin de la simulacion"
         severity failure;
