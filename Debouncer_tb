@@ -47,4 +47,7 @@ begin
   process
   begin
   
+   assert false
+        report "Fin de la simulacion"
+        severity failure;
   end process;
