@@ -69,20 +69,21 @@ begin
 maquina: MaquinaDeEstados PORT MAP (clk=>clock_top,
                     reset=>reset_top,
 		    clk=>clock;
-		    boton_c=> boton_c   ;
-		    boton_l=> boton_l    ;
-		    led_corto => led_corto; 
-		    led_largo =>led_largo  ;
-		    led_espera => led_espera;
-		    led_listo => led_listo;
-		    cuenta=> cuenta;
+		    boton_c=> boton_c,
+		    boton_l=> boton_l,
+		    led_corto => led_corto, 
+		    led_largo =>led_largo,
+		    led_espera => led_espera,
+		    led_listo => led_listo,,
+		    cuenta=> cuenta
     
                     );
 
 contador: contador PORT MAP (clk=>clock_top,
                     rst=>reset_top,
                     enable=> enable,
-                    salida =>cuenta
+                    salida =>salida_top,
+		    count => cuenta
                     );
 		    
 debouncer: Debouncer PORT MAP(
