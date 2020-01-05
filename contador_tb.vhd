@@ -3,14 +3,14 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
  
  
-ENTITY counter_tb IS
-END counter_tb;
+ENTITY contador_tb IS
+END contador_tb;
  
-ARCHITECTURE behavior OF counter_tb IS 
+ARCHITECTURE behavior OF contador_tb IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT counter
+    COMPONENT contador
     PORT(
          clk : IN  std_logic;
          rst : IN  std_logic;
@@ -36,7 +36,7 @@ ARCHITECTURE behavior OF counter_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: counter PORT MAP (
+   uut: contador PORT MAP (
           clk => clk,
           rst => rst,
           enable => enable,
