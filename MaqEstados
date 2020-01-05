@@ -6,7 +6,9 @@ use ieee.numeric_std.all;
 
 entity MaqEstad is
  PORT(boton_c,boton_l,reset,clk: IN std_logic;
- led_corto,led_largo,led_espera,led_listo: OUT std_logic);
+ led_corto,led_largo,led_espera,led_listo: OUT std_logic;
+ count: in std_logic_vector(4 down to 0)
+ );
  
 end MaqEstad;
 
@@ -74,18 +76,18 @@ BEGIN
     END CASE;
 END process salida; 
 
-contador:
-PROCESS(clk)
-BEGIN
-IF clk='1' THEN
-IF rescont THEN cuenta<=0;
-ELSE cuenta<=cuenta+1;
-END IF;
-END IF;
-END PROCESS contador;
--- Definicion de los tiempos(creo que esto iria en top)
-fin_largo<=true WHEN cuenta=30 ELSE false;
-fin_corto<=true WHEN cuenta=20 ELSE false;
+--contador:
+--PROCESS(clk)
+--BEGIN
+--IF clk='1' THEN
+--IF rescont THEN cuenta<=0;
+--ELSE cuenta<=cuenta+1;
+--END IF;
+--END IF;
+--END PROCESS contador;
+
+fin_largo<=true WHEN count=30 ELSE false;
+fin_corto<=true WHEN count=20 ELSE false;
 
 
 END behavioral;
