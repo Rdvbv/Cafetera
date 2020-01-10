@@ -16,9 +16,9 @@ architecture behavioral of top_cafetera is
 
 COMPONENT MaquinaDeEstados IS 
         PORT(
-               boton_c,boton_l,reset, clk : in std_logic;
+               boton_c,boton_l,boton_latte,boton_cortado,boton_choco,reset, clk : in std_logic;
 	       --presente: in std_logic;
-               led_corto,led_largo,led_espera,led_listo : out std_logic;    
+               led_corto,led_largo,led_cortado,led_latte,led_choco,led_espera,led_listo, led_leche, led_azucar: out std_logic;    
         );
 END COMPONENT;
  
@@ -54,9 +54,17 @@ signal btn_in: std_logic;
 signal btn_out: std_logic;
 signal boton_c: std_logic;
 signal boton_l: std_logic;
+signal boton_latte: std_logic;
+signal boton_cortado: std_logic;
+signal boton_choco: std_logic;
 signal led_corto: std_logic;
 signal led_largo: std_logic;
+signal led_latte: std_logic;
+signal led_cortado: std_logic;
+signal led_choco: std_logic;
 signal led_espera: std_logic;
+signal led_leche: std_logic;
+signal led_azucar: std_logic;
 signal led_listo: std_logic;
 signal sync_in: std_logic;
 signal sync_out: std_logic;
@@ -74,6 +82,11 @@ maquina: MaquinaDeEstados PORT MAP (clk=>clock_top,
 		    led_largo =>led_largo,
 		    led_espera => led_espera,
 		    led_listo => led_listo,
+		    led_cortado=> led_cortado,
+		    led_latte=> led_latte,
+		    led_choco=>led_choco,
+		    led_leche=> led_leche,
+		    led_azucar=> led_azucar,
                     );
 
 contador: contador PORT MAP (clk=>clock_top,
