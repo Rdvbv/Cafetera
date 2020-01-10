@@ -74,9 +74,7 @@ maquina: MaquinaDeEstados PORT MAP (clk=>clock_top,
 		    led_corto => led_corto, 
 		    led_largo =>led_largo,
 		    led_espera => led_espera,
-		    led_listo => led_listo,,
-		    cuenta=> cuenta
-    
+		    led_listo => led_listo,
                     );
 
 contador: contador PORT MAP (clk=>clock_top,
