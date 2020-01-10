@@ -8,7 +8,6 @@ entity top_cafetera is
         clock_top: in std_logic;
         seleccion: out std_logic_vector(4 downto 0)
 	boton: in std_logic;
-	----añsdir botones
          );
 end top_cafetera;
 
@@ -61,7 +60,7 @@ signal led_espera: std_logic;
 signal led_listo: std_logic;
 signal sync_in: std_logic;
 signal sync_out: std_logic;
-signal cuenta:std_logic;
+
 
 begin
 
@@ -81,7 +80,7 @@ contador: contador PORT MAP (clk=>clock_top,
                     rst=>reset_top,
                     enable=> enable,
                     salida =>salida_top,
-		    count => cuenta
+		    count => seleccion
                     );
 		    
 debouncer: Debouncer PORT MAP(
