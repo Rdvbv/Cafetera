@@ -2,41 +2,41 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity Contador_compuesto is
-generic (
-    WIDTH: positive := 4);
-    port (
-        CLR : in std_logic;
-        CLK : in std_logic;
-        clk_r:in std_logic;
-        UP : in std_logic;
-        CE_N : in std_logic;
-        LOAD_N: in std_logic;
-        J_dec: in std_logic_vector (WIDTH - 1 downto 0);
-        J_unid: in std_logic_vector (WIDTH - 1 downto 0);
-        ZERO_N: out std_logic;
-        Q_unid : out std_logic_vector (WIDTH - 1 downto 0);
-        Q_dec : out std_logic_vector (WIDTH - 1 downto 0)       
-);
+generic (WIDTH: positive := 4);
+      port (
+                CLR : in std_logic;
+                CLK : in std_logic;
+                clk_r:in std_logic;
+                UP : in std_logic;
+                CE_N : in std_logic;
+                LOAD_N: in std_logic;
+                J_dec: in std_logic_vector (WIDTH - 1 downto 0);
+                J_unid: in std_logic_vector (WIDTH - 1 downto 0);
+                ZERO_N: out std_logic;
+                Q_unid : out std_logic_vector (WIDTH - 1 downto 0);
+                Q_dec : out std_logic_vector (WIDTH - 1 downto 0)       
+            );
 end Contador_compuesto;
 
 architecture Behavioral of Contador_compuesto is
 COMPONENT counter IS
-    Port(
-        CLR: in std_logic;
-        CLK : in std_logic;
-        UP : in std_logic;
-        CE_N : in std_logic;
-        LOAD_N: in std_logic;
-        J : in std_logic_vector (WIDTH - 1 downto 0);
-        ZERO_N: out std_logic;
-        Q : out std_logic_vector (WIDTH - 1 downto 0)
-    );
+      Port(
+                CLR: in std_logic;
+                CLK : in std_logic;
+                UP : in std_logic;
+                CE_N : in std_logic;
+                LOAD_N: in std_logic;
+                J : in std_logic_vector (WIDTH - 1 downto 0);
+                ZERO_N: out std_logic;
+                Q : out std_logic_vector (WIDTH - 1 downto 0)
+          );
 END COMPONENT;
 COMPONENT fdivider IS
-      generic(module:positive);
-      Port( clk : in STD_LOGIC;
-           reset : in STD_LOGIC;
-           ce_out : out STD_LOGIC);
+  generic(module:positive);
+      Port( 
+                clk : in STD_LOGIC;
+                reset : in STD_LOGIC;
+                ce_out : out STD_LOGIC);
 END COMPONENT;
 
 Signal ZERO_N_unid_INT: std_logic;
@@ -46,45 +46,47 @@ Signal Load_uni:std_logic;
 Signal Load_dec:std_logic;
 Signal J_unid_in:std_logic_vector (WIDTH - 1 downto 0):="0101";
 Signal J_dec_in:std_logic_vector (WIDTH - 1 downto 0);
-begin
-count_unid: counter PORT MAP(
-  CLR=>CLR,
-  CLK=>CLK,
-  UP=>UP,
-  CE_N=>CE_N,
-  LOAD_N=>load_int,
-  J=>J_unid_in,
-  ZERO_N=>ZERO_N_unid_INT,
-  Q=>Q_unid
-);
-count_dece: counter PORT MAP(
-  CLR=>CLR,
-  CLK=>CLK,
-  UP=>UP,
-  CE_N=>ZERO_N_unid_INT,
-  LOAD_N=>LOAD_N,
-  J=>J_dec,
-  ZERO_N=>ZERO_N_dec_INT,
-  Q=>Q_dec
-);
+  begin
+    count_unid: counter 
+      PORT MAP(
+                CLR=>CLR,
+                CLK=>CLK,
+                UP=>UP,
+                CE_N=>CE_N,
+                LOAD_N=>load_int,
+                J=>J_unid_in,
+                ZERO_N=>ZERO_N_unid_INT,
+                Q=>Q_unid
+              );
+    count_dece: counter 
+      PORT MAP(
+                CLR=>CLR,
+                CLK=>CLK,
+                UP=>UP,
+                CE_N=>ZERO_N_unid_INT,
+                LOAD_N=>LOAD_N,
+                J=>J_dec,
+                ZERO_N=>ZERO_N_dec_INT,
+                Q=>Q_dec
+              );
 Load_uni<=Load_N or Load_int;
 ZERO_N <= '0' when (ZERO_N_unid_INT ='0' and ZERO_N_dec_INT='0') 
               else '1';
 
-process(clk_r,load_N,J_unid)
-begin
-if (load_N='0') then
-    load_int<='0';   
-    J_unid_in<=J_unid; 
-else 
-    load_int<='1';  
-    if(rising_edge(clk)) then
-        if (ZERO_N_unid_INT='0' and ZERO_N_dec_INT='1' and load_int='1') then     
-            J_unid_in<="1001";
-            load_int<='0';--le cargamos un 9 para que vuelva a hacer la resta de las unidades
-    end if; 
-    end if; 
+ process(clk_r,load_N,J_unid)
+  begin 
+     if (load_N='0') then
+         load_int<='0';   
+         J_unid_in<=J_unid; 
+     else 
+         load_int<='1';  
+       if(rising_edge(clk)) then
+         if   (ZERO_N_unid_INT='0' and ZERO_N_dec_INT='1' and load_int='1') then     
+               J_unid_in<="1001";
+               load_int<='0';--le cargamos un 9 para que vuelva a hacer la resta de las unidades
+         end if; 
+       end if; 
       
-end if;
-end process;
+     end if;
+ end process;
 end Behavioral;
