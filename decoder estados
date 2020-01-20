@@ -2,35 +2,36 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity state_decoder is
-    Port ( state : in STD_LOGIC_VECTOR (3 downto 0);
+    Port ( 
+           state : in STD_LOGIC_VECTOR (3 downto 0);
            code_1 : out STD_LOGIC_VECTOR (6 downto 0);
            code_2 : out STD_LOGIC_VECTOR (6 downto 0);
            code_3 : out STD_LOGIC_VECTOR (6 downto 0));
 end state_decoder;
 
 architecture Behavioral of state_decoder is
-begin
-WITH state SELECT
-code_1<= "0110001" WHEN "0010",
-         "0110001" WHEN "1010",
-         "0110001" WHEN "0110",
-         "0110001" WHEN "1011",          
-         "1110001" WHEN "0011",
-         "0110001" WHEN "0111",
-         "1111111" WHEN OTHERS;
+    begin
+        WITH state SELECT
+            code_1<= "0110001" WHEN "0010",
+                     "0110001" WHEN "1010",
+                     "0110001" WHEN "0110",
+                     "0110001" WHEN "1011",          
+                     "1110001" WHEN "0011",
+                     "0110001" WHEN "0111",
+                     "1111111" WHEN OTHERS;
          
-WITH state SELECT
-code_2<= "1110001" WHEN "0110",
-         "1110001" WHEN "1010",
-         "0000001" WHEN "0111",
-         "0000001" WHEN "1011",
-         "1111111" WHEN OTHERS;
-WITH state SELECT
-code_3<= "1110001" WHEN "1010",
-         "1110001" WHEN "1011",
-         "0110001" WHEN "0010",
-         "0110001" WHEN "0011",
-         "0110001" WHEN "0110",
-         "0110001" WHEN "0111",
-         "1111111" WHEN OTHERS;    
+        WITH state SELECT
+            code_2<= "1110001" WHEN "0110",
+                     "1110001" WHEN "1010",
+                     "0000001" WHEN "0111",
+                     "0000001" WHEN "1011",
+                     "1111111" WHEN OTHERS;
+        WITH state SELECT
+            code_3<= "1110001" WHEN "1010",
+                     "1110001" WHEN "1011",
+                     "0110001" WHEN "0010",
+                     "0110001" WHEN "0011",
+                     "0110001" WHEN "0110",
+                     "0110001" WHEN "0111",
+                     "1111111" WHEN OTHERS;    
 end Behavioral;
