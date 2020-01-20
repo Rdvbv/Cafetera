@@ -1,40 +1,141 @@
-use IEEE.NUMERIC_STD.ALL;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 
-
-entity contador is
-    generic (max:integer:=30);
-    Port ( clk : in  STD_LOGIC;
-           rst : in  STD_LOGIC;
-           enable : in  STD_LOGIC;
-           count : out  STD_LOGIC_VECTOR (4 downto 0);
-           salida : out  STD_LOGIC);
-end contador;
-
-architecture Behavioral of contador is
-signal cnt: unsigned (4 downto 0);
+entity Contador is
+    generic(width_t: positive:=8);
+    Port ( 
+           Reset: in STD_LOGIC;
+           CE_N: in STD_LOGIC;
+           CLK_master: in STD_LOGIC;
+           LOAD_N: in std_logic;
+           Estado: in STD_LOGIC_VECTOR (3 downto 0);
+           unidades: in STD_LOGIC_VECTOR (3 downto 0);
+           decenas: in STD_LOGIC_VECTOR (3 downto 0);
+           display_number: out std_logic_vector (6 downto 0);
+           display_selection: out std_logic_vector (7 downto 0);
+           ZERO_N: out STD_LOGIC
+           );
+end Contador;
+architecture Behavioral of Contador is
+COMPONENT fdivider IS
+      generic(module:positive);
+      Port( clk : in STD_LOGIC;
+           reset : in STD_LOGIC;
+           ce_out : out STD_LOGIC);
+END COMPONENT;
+COMPONENT Contador_compuesto IS
+    generic ( WIDTH: positive := 4);
+    port ( CLR : in std_logic;
+        CLK : in std_logic;
+        Clk_r:in std_logic;
+        UP : in std_logic;
+        CE_N : in std_logic;
+        LOAD_N: in std_logic;
+        J_dec: in std_logic_vector (WIDTH - 1 downto 0);
+        J_unid: in std_logic_vector (WIDTH - 1 downto 0);
+        ZERO_N: out std_logic;
+        Q_unid : out std_logic_vector (WIDTH - 1 downto 0);
+        Q_dec : out std_logic_vector (WIDTH - 1 downto 0)       
+);
+END COMPONENT;
+COMPONENT Decoder IS
+    Port(code : IN std_logic_vector(3 DOWNTO 0);
+         led : OUT std_logic_vector(6 DOWNTO 0));
+END COMPONENT;
+COMPONENT State_Decoder IS
+    Port ( state : in STD_LOGIC_VECTOR (3 downto 0);
+           code_1 : out STD_LOGIC_VECTOR (6 downto 0);
+           code_2 : out STD_LOGIC_VECTOR (6 downto 0);
+           code_3 : out STD_LOGIC_VECTOR (6 downto 0));
+END COMPONENT;
+COMPONENT Display_refresh IS
+        generic (width_7:positive:=7);
+        Port(
+                clk :in std_logic;
+                ce_N:in std_logic;
+                reset:in std_logic;
+                Segment_unid: in std_logic_vector (width_7-1 downto 0);--unidades
+                Segment_dec: in std_logic_vector (width_7-1 downto 0);--decenas
+                display_number: out std_logic_vector (width_7-1 downto 0);--numero
+                display_selection: out std_logic_vector (7 downto 0);--selección del display.
+                Segment_2:in std_logic_vector (width_7-1 downto 0);
+                Segment_3:in std_logic_vector (width_7-1 downto 0);
+                Segment_4:in std_logic_vector (width_7-1 downto 0);
+                Segment_5:in std_logic_vector (width_7-1 downto 0);
+                Segment_6:in std_logic_vector (width_7-1 downto 0);
+                Segment_7:in std_logic_vector (width_7-1 downto 0)
+            );
+END COMPONENT;
+SIGNAL clk_1s:std_logic;
+SIGNAL clk_1ms:std_logic;
+SIGNAL clk_r:std_logic;
+SIGNAL Q_unidades:std_logic_vector (3 downto 0);
+SIGNAL Q_decenas:std_logic_vector (3 downto 0);
+SIGNAL BCD_unidades:std_logic_vector (6 downto 0);
+SIGNAL BCD_decenas:std_logic_vector (6 downto 0);
+SIGNAL letra_1:std_logic_vector (6 downto 0);
+SIGNAL letra_2:std_logic_vector (6 downto 0);
+SIGNAL letra_3:std_logic_vector (6 downto 0);
 begin
+ clk1s: fdivider 
+        GENERIC MAP( module=>100000000)--100000000 --5
+        PORT MAP(
+            clk=>CLK_master,
+            reset=>reset,
+            ce_out=>clk_1s);
+ clk1ms: fdivider 
+        GENERIC MAP(module=>100000)--100000 --2 --100000 1 ms 
+        PORT MAP(
+             clk=>CLK_master,
+             reset=>reset,
+             ce_out=>clk_1ms); 
+clk_rap: fdivider 
+         GENERIC MAP(module=>5)--100000 --2 --100000 1 ms 
+         PORT MAP(
+              clk=>CLK_master,
+              reset=>reset,
+              ce_out=>clk_r);          
+ cont: Contador_compuesto
+        PORT MAP(
+            CLR=>reset,
+            CLK=>clk_1s,
+            clk_r=>clk_r,
+            UP=>'0',
+            CE_N=>ce_N,
+            LOAD_N=>LOAD_N,
+            J_dec=>decenas,
+            J_unid=>unidades,
+            ZERO_N=>ZERO_N,
+            Q_unid=>Q_unidades,
+            Q_dec=>Q_decenas);    
 
-	process (clk, rst, enable)
-	variable salida_aux: std_logic;
-	begin
-	  if (rst='1') then
-	     cnt<=(others=>'0');
-		 salida<='0';
-	  elsif clk'event and clk='1' then
-			if enable ='1' then
-			  if cnt<tope then
-					cnt<=cnt+1;
-					salida<='0';
-					if cnt=max-1 then
-						salida<='1';
-					end if;
-			   else
-					cnt<="0000";
-					salida<='0';
-				end if;
-			end if;
-	  end if;
-	end process;
-   count <=std_logic_vector(cnt);
-
-end Behavioral;
+ decunid:Decoder
+        PORT MAP(
+            code=>Q_unidades,
+            led=>BCD_unidades);
+ decdec:Decoder
+       PORT MAP(
+           code=>Q_decenas,
+           led=>BCD_decenas);
+ dec_state:State_Decoder
+       PORT MAP(
+           state=>Estado,
+           code_1=>letra_1,
+           code_2=>letra_2,
+           code_3=>letra_3);
+ display:Display_refresh
+        PORT MAP(
+            clk=>clk_1ms,
+            ce_N=>ce_N,
+            segment_unid=>BCD_unidades,
+            segment_dec=>BCD_decenas,
+            reset=>reset,
+            display_number=>display_number,
+            display_selection=>display_selection,
+            segment_7=>letra_1,
+            segment_6=>letra_2,
+            segment_5=>"1111111",
+            segment_4=>"1111111",
+            segment_3=>letra_3,
+            segment_2=>"1111111");                   
+ end Behavioral;
