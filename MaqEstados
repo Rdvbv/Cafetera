@@ -2,163 +2,241 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.std_logic_unsigned.all;
 use ieee.numeric_std.all;
+entity MaquinaEstados is
 
+    Port(
+        Reset, Clk, Corto, Largo,Latte,Cortado, Encendido : in std_logic;
+        Siguiente:in std_logic;
+        Bomba_Led, Leche_Led, Indica_On : out std_logic;
+        Estado_out: out std_logic_vector(3 downto 0);
+        tiempo_decenas_salida: out  std_logic_vector(3 downto 0);
+        tiempo_unidades_salida: out std_logic_vector(3 downto 0);
+        Load_N:out std_logic
+      );
+end MaquinaEstados;
 
-entity MaqEstad is
- PORT(boton_c,boton_l,boton_latte, boton_cortado,boton_choco,azucar,reset,clk: IN std_logic;
- led_corto,led_largo,led_espera,led_listo, led_cortado,led_latte,led_choco: OUT std_logic;
- count: in std_logic_vector(4 down to 0)
- );
- 
-end MaqEstad;
+architecture Behavioral of MaquinaEstados is
+    constant tiempo_C_decenas: unsigned(3 downto 0):= "0000"; --0
+    constant tiempo_C_unidades: unsigned(3 downto 0) :="1000";--8
+    constant tiempo_L_decenas: unsigned(3 downto 0) :="0001";--1
+    constant tiempo_L_unidades: unsigned(3 downto 0) :="0101";--5
+    constant tiempo_CL_decenas: unsigned(3 downto 0):= "0001"; --1
+    constant tiempo_CL_unidades: unsigned(3 downto 0) :="0101";--5
+    constant tiempo_COR_decenas: unsigned(3 downto 0) :="0001";--1
+    constant tiempo_COR_unidades: unsigned(3 downto 0) :="0010";--2
+    constant tiempo_L_CL_decenas: unsigned(3 downto 0):= "0001"; --1   tiempo de leche en latte
+    constant tiempo_L_CL_unidades: unsigned(3 downto 0) :="0000";--0
+    constant tiempo_L_COR_decenas: unsigned(3 downto 0) :="0000";-- tiempo de leche en cortado
+    constant tiempo_L_COR_unidades: unsigned(3 downto 0) :="0101";--5
+    
+  type estado is (Apagado, Espera , Listo_corto, Listo_largo,Preparando_corto,Preparando_largo,Trans_latte,Trans_cortado,Preparando_latte,Preparando_cortado,Listo_Latte,Listo_Cortado,Leche_latte,Leche_cortado);
+  signal state_register: estado;
+  signal next_state: estado; 
+  signal flag: integer;   
+  begin
+    status_register: process(Clk)
+    begin
+      if rising_edge(Clk) then
+        if Reset = '1' then 
+          state_register <= Espera;           
+        else
+          state_register <= next_state;
+        end if;
+      end if;
+    end process;
+    
+    Siguiente_Estado: process(Reset,state_register, Corto, Largo, Encendido,Latte,Cortado,Siguiente)
+    begin
+      next_state <= state_register;       
+               
+      case state_register is 
+        when Apagado =>
+          if Encendido = '1' then
+            next_state <= Espera;
+          elsif Encendido='0' then 
+            next_state <= Apagado;
+          end if;
+        when Espera=> 
+          if Corto= '1' then                         
+            next_state<= Preparando_corto;
+          elsif Largo = '1' then                         
+            next_state <= Preparando_largo;
+          elsif Latte='1' then 
+            next_state <= Preparando_latte;
+          elsif Cortado = '1' then 
+            next_state <= Preparando_cortado;
+          elsif Encendido='0' then 
+            next_state <= Apagado;
+          end if;
+      when Listo_corto=>
+        if Siguiente = '1' then 
+          next_state <= Espera;
+        elsif Encendido='0' then 
+          next_state <= Apagado;
+        end if;                      
+      when Listo_largo=>
+        if Siguiente = '1' then 
+          next_state <= Espera;
+        elsif Encendido='0' then 
+          next_state <=Apagado;
+        end if;                               
+      when Preparando_corto=>
+        if Siguiente = '0' then --
+          next_state <=Listo_corto;
+        end if;
 
-architecture Behavioral of MaqEstad is
-TYPE estado IS (espera,preparando_c,preparando_l,preparando_latte,preparando_cortado,preparando_choco,listo);
+      when Preparando_largo=>
+        if Siguiente = '0' then
+          next_state<=Listo_largo;
+        end if;
+      when Trans_latte=>
+        if Siguiente='1' then
+          next_state<=Leche_latte;
+        elsif Encendido='0' then 
+          next_state <= Apagado;
+        end if;
+      when Trans_cortado=>
+        if Siguiente='1' then
+          next_state<=Leche_cortado;
+        elsif Encendido='0' then 
+          next_state <= Apagado;
+        end if;
+      when Preparando_latte=>
+        if Siguiente='0' then
+          next_state<=Trans_latte;
+        end if;
+      when Preparando_cortado=>
+        if Siguiente='0' then
+          next_state<=Trans_cortado;
+        end if ;
+      when Listo_Latte=>
+        if Siguiente='1' then 
+          next_state<= Espera;
+        elsif Encendido='0' then 
+          next_state <=Apagado;
+        elsif Reset = '1' then 
+          next_state <=Espera;
+        end if;
+      when Listo_Cortado=>
+        if Siguiente='1'then 
+          next_state<= Espera;
+        elsif Encendido='0' then 
+          next_state <=Apagado;
+        end if;  
+      when Leche_latte=>
+        if Siguiente='0' then
+         next_state<=Listo_Latte;
+        end if;
+      when Leche_cortado=>
+        if Siguiente='0' then
+          next_state<=Listo_Cortado;
+        end if;
+      when others =>
+        next_state <= Apagado;      
+    end case;       
+  end process; 
 
-SIGNAL presente:estado:=espera;
-SIGNAL resetcont: boolean:=false; --Resetea contador
-SIGNAL fin_largo, fin_corto, fin_choco,fin_latte,fin_cortado,fin_azucar:boolean; --Indica el fin de la cuenta, para tipos de cafes.
-SIGNAL cuenta:integer RANGE 0 TO 29;
-
-
-begin
-maquina: 
-PROCESS(clk, reset)
-begin
-    IF reset='1' THEN
-        presente<=espera;
-    ELSE IF clk='1' AND clk'EVENT THEN
-        CASE presente IS
-            WHEN espera =>
-                IF boton_c='1' THEN
-                    presente<=preparando_c;
-                END IF;
-                ELSEIF boton_l='1' THEN
-                presente<=preparando_l;
-                END IF;
-                 ELSEIF boton_cortado='1' THEN
-                presente<=preparando_cortado;
-                END IF;
-                ELSEIF boton_latte='1' THEN
-                presente<=preparando_latte;
-                END IF;
-                ELSEIF boton_choco='1' THEN
-                presente<=preparando_choco;
-                END IF;
-                
-            WHEN preparando_c =>
-                IF fin_corto THEN
-                    presente<=listo;
-                END IF;
-            WHEN preparando_l =>
-                IF fin_largo THEN
-                    presente<=listo;
-                END IF;
-            WHEN preparando_latte =>
-              IF fin_latte THEN
-                  presente<=listo;
-              END IF;
-            WHEN preparando_cortado =>
-              IF fin_cortado THEN
-                  presente<=listo;
-              END IF;
-            WHEN preparando_choco =>
-              IF fin_choco THEN
-                  presente<=listo;
-              END IF;
-            WHEN listo =>
-              wait 300;
-                presente<= espera;
-        END CASE;
-    END IF;
-    END IF;
-end process;
-
-
-salida:
-process(presente)
-BEGIN
-    CASE presente IS
-        WHEN espera =>
-            led_espera<= '1';
-            led_corto<= '0';
-            led_largo<= '0';
-            led_cortado<= '0';
-            led_latte<= '0';
-            led_choco<= '0';
-            led_listo<='0';
-            resetcont<=false;
-        WHEN preparando_c =>
-            led_espera<= '0';
-            led_corto<='1';
-            resetcont<=false;
-          IF azucar='1' THEN 
-           IF fin_azucar='0'
-              led_azucar<='1';
-           END IF;
-          ELSE led_azucar<= '0';
-            resetcont<=false;
-        WHEN preparando_l =>
-            led_espera<= '0';   
-            led_largo<='1';
-          IF azucar='1' THEN 
-           IF fin_azucar='0'
-              led_azucar<='1';
-           END IF;
-          ELSE led_azucar<= '0';
-            resetcont<=false;
-        WHEN preparando_latte =>
-            led_espera<= '0';   
-            led_latte='1';
-          IF azucar='1' THEN 
-           IF fin_azucar='0'
-              led_azucar<='1';
-           END IF;
-          ELSE led_azucar<= '0';
-            resetcont<=false;
-        WHEN preparando_cortado =>
-          led_espera<= '0';   
-          led_cortado='1';
-         IF azucar='1' THEN 
-           IF fin_azucar='0'
-              led_azucar<='1';
-           END IF;
-          ELSE led_azucar<= '0';
-          resetcont<=false;
-        WHEN preparando_choco =>
-          led_espera<= '0';   
-          led_choco='1';
-          IF azucar='1' THEN 
-           IF fin_azucar='0'
-              led_azucar<='1';
-           END IF;
-          ELSE led_azucar<= '0';
-          resetcont<=false;
-        WHEN listo =>
-            led_espera<= '0';
-            led_corto<= '0';
-            led_largo<= '0';
-            led_cortado<= '0';
-            led_latte<= '0';
-            led_choco <='0';
-            led_listo<='1';
-            resetcont<=true;
-    END CASE;
-END process salida; 
-contador:
-PROCESS(clk)
-BEGIN
-IF clk='1' THEN
-IF rescont THEN cuenta<=0;
-ELSE cuenta<=cuenta+1;
-END IF;
-END IF;
-END PROCESS contador;
-
-fin_largo<=true WHEN count=5 ELSE false;
-fin_corto<=true WHEN count=3 ELSE false;
-leche_corto <= true WHEN count=3 ELSE false;
-leche_largo <= true WHEN count=5 ELSE false;
-choco_fin <= true WHEN count=8 ELSE false;
-azucar_fin <= true WHEN  count=2 ELSE false;
-END behavioral;
+  salidas:process(state_register)
+   begin
+        case state_register is
+            when Apagado=>
+                Bomba_Led<='0';
+                Indica_On<='0';
+                Leche_Led<='0';              
+                Estado_out<="0000";               
+            when Espera=>
+                Bomba_Led<='0';
+                Indica_On<='1';
+                Leche_Led<='0';
+                Estado_out<="0001";
+                tiempo_decenas_salida<=(others=>'0');
+                tiempo_unidades_salida<=(others=>'0');
+                Load_N<='0';              
+           
+            when Listo_corto=>
+                Bomba_Led<='1';
+                Indica_On<='1';
+                Leche_Led<='0';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_C_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_C_unidades);
+                Estado_out<="0010";
+                Load_N<='1';
+            when Listo_largo=>
+                Bomba_Led<='1';
+                Indica_On<='1';
+                Leche_Led<='0';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_L_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_L_unidades);
+                Estado_out<="0011";
+                Load_N<='1';
+            when Preparando_corto=>
+                Indica_On<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_C_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_C_unidades);
+                Load_N<='0';
+                Estado_out<="0100";
+            when Preparando_largo=>
+                Indica_On<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_L_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_L_unidades);
+                Load_N<='0';
+                Estado_out<="0101";
+            when Trans_latte=>
+                Bomba_Led<='1';
+                Indica_On<='1';
+                Leche_Led<='0';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
+                Estado_out<="0110";
+                Load_N<='1';
+            when Trans_cortado=>
+                Bomba_Led<='1';
+                Indica_On<='1';
+                Leche_Led<='0';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_COR_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_COR_unidades);
+                Estado_out<="0111";
+                Load_N<='1';
+          when Preparando_latte=>
+                Indica_On<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
+                Load_N<='0';
+                Estado_out<="1000"; 
+          when Preparando_cortado=>
+                  Indica_On<='1';
+                  tiempo_decenas_salida<= std_logic_vector(tiempo_COR_decenas);
+                  tiempo_unidades_salida<=std_logic_vector(tiempo_COR_unidades);
+                  Load_N<='0';
+                  Estado_out<="1001";
+          when Listo_Latte=>
+                  Bomba_Led<='0';
+                  Indica_On<='1';
+                  Leche_Led<='1';
+                  tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas);
+                  tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
+                  Estado_out<="1010";
+                  Load_N<='1';
+          when Listo_Cortado=>
+                  Bomba_Led<='0';
+                  Indica_On<='1';
+                  Leche_Led<='1';
+                  tiempo_decenas_salida<= std_logic_vector(tiempo_L_COR_decenas);
+                  tiempo_unidades_salida<=std_logic_vector(tiempo_L_COR_unidades);
+                  Estado_out<="1011";
+                  Load_N<='1'; 
+          when Leche_latte=>
+                   Indica_On<='1';
+                   tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas);
+                   tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
+                   Load_N<='0';
+                   Estado_out<="1100";  
+           when Leche_cortado=>
+                  Indica_On<='1';
+                  tiempo_decenas_salida<= std_logic_vector(tiempo_L_COR_decenas);
+                  tiempo_unidades_salida<=std_logic_vector(tiempo_L_COR_unidades);
+                  Load_N<='0';
+                  Estado_out<="1101";               
+         end case;
+   end process;       
+end Behavioral;     
