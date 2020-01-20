@@ -1,0 +1,33 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Led_azucar is
+   Port ( 
+           vector_entrada : in STD_LOGIC_VECTOR(3-1 downto 0);
+           vector_salida : out STD_LOGIC_VECTOR(5-1 downto 0);
+           clk: in STD_LOGIC);
+end Led_azucar;
+
+architecture Behavioral of Led_azucar is
+SIGNAL vector: STD_LOGIC_VECTOR(5-1 downto 0);
+  begin
+    process(clk)
+     begin
+      if vector_entrada = "000" then 
+            vector<="00000";
+      elsif vector_entrada = "001" then 
+            vector<="10000";
+      elsif vector_entrada = "010" then 
+            vector<="11000";
+      elsif vector_entrada = "011" then 
+            vector<="11100";
+      elsif vector_entrada = "100" then 
+            vector<="11110";    
+      elsif vector_entrada = "101" then 
+            vector<="11111";     
+      else 
+            vector <=(others => '0');
+      end if;
+    end process;
+  vector_salida<=vector;
+end Behavioral;
