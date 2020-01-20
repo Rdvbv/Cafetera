@@ -1,0 +1,42 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+
+entity Azucar is
+    Port (  clk : in STD_LOGIC;
+            up : in STD_LOGIC;
+            down : in STD_LOGIC;
+            clr: in STD_LOGIC;
+            LOAD_N: in STD_LOGIC;
+            q_out: out STD_LOGIC_VECTOR(3-1 downto 0));
+end Azucar;
+
+architecture Behavioral of Azucar is
+signal q_i: unsigned(3-1 downto 0);
+begin
+  process(clk,clr,up,down,load_n)
+    begin
+             if clr = '1' then
+             q_i <= (others => '0');
+             elsif (LOAD_N = '0') then
+                     q_i <="011";
+             elsif (rising_edge(clk)) then
+       if (rising_edge(clk)) then
+           if clr = '1' then
+                q_i <= (others => '0');
+           elsif (LOAD_N = '0') then
+                   q_i <="011";
+            elsif UP = '1' then
+                if q_i<"101" then
+                q_i <= q_i + 1;
+                end if;
+            elsif DOWN = '1' then 
+                if q_i > "000" then
+                q_i <= q_i - 1;    
+                end if;
+            end if;
+       end if;
+   end process;
+  q_out<=std_logic_vector(q_i);   
+end Behavioral;
