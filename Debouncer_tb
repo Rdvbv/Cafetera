@@ -6,14 +6,15 @@ end Debouncer_tb;
 
 architecture behavioral of Debouncer_tb is 
 
--- Component Declaration for the Unit Under Test (UUT)
-  COMPONENT Debouncer
-  port (
-        clk : in std_logic;
-        rst : in std_logic;
-        btn_in : in std_logic;
-        btn_out : out std_logic);
-  END COMPONENT;
+  --Component Declaration for the Unit Under Test (UUT)
+      COMPONENT Debouncer
+        port (
+                clk : in std_logic;
+                rst : in std_logic;
+                btn_in : in std_logic;
+                btn_out : out std_logic
+             );
+      END COMPONENT;
 
 --Inputs 
 signal clk : std_logic :='0';
@@ -24,34 +25,34 @@ signal btn_in: std_logic :='0';
 signal btn_out : std_logic'0';
 
 -- Clock period definitions
-  constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 10 ns;
 
-begin
+ begin
   -- Instantiate the Unit Under Test (UUT)
-   Debouncer PORT MAP(
-                clk => clk,
-                rst => rst,
-                btn_in =>btn_in ,
-                btn_out =>btn_out
-                );
+    Debouncer PORT MAP(
+                        clk => clk,
+                        rst => rst,
+                        btn_in =>btn_in ,
+                        btn_out =>btn_out
+                      );
   -- Clock process definitions
    process
     begin
-        clk <= '0';
-        wait for  CLK_PERIOD /2;
-        clk <= '1';
-        wait for  CLK_PERIOD /2;
-    end process;
+          clk <= '0';
+          wait for  CLK_PERIOD /2;
+          clk <= '1';
+          wait for  CLK_PERIOD /2;
+   end process;
   
   -- Stimulus process
   process
-  begin
+    begin
   
-  -- probamos reset
-  rst <='0';
-  wait 20 ms;
-  rst <= '1';
-  wait 20 ms;
+          -- probamos reset
+             rst <='0';
+             wait 20 ms;
+             rst <= '1';
+             wait 20 ms;
   
   --probamos que pasa al activar y desactivar entrada
   
