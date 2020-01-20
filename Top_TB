@@ -5,57 +5,57 @@ entity TOP_tb is
 --  Port ( );
 end TOP_tb;
 architecture Behavioral of TOP_tb is
-COMPONENT TOP IS
-port(
-     Reset, Clk, Corto, Largo, Latte, Cortado, Encendido : in std_logic;
-     Bomba_Led,Leche_Led, Indica_On : out std_logic;
-     Estado_out: out std_logic_vector(3 downto 0);
-     ZERO_N: out std_logic ;        
-     Display_number:out std_logic_vector(6 downto 0);
-     Display_selection:out std_logic_vector(7 downto 0)     
-        ); 
-END COMPONENT;    
-SIGNAL Reset_tb: STD_LOGIC:='0';
-SIGNAL Clk_tb:STD_LOGIC:= '0';
-SIGNAL Corto_tb:STD_LOGIC;
-SIGNAL Largo_tb:STD_LOGIC;
-SIGNAL Latte_tb:STD_LOGIC;
-SIGNAL Cortado_tb:STD_LOGIC;
-SIGNAL Bomba_Led_tb:STD_LOGIC;
-SIGNAL Leche_Led_tb:STD_LOGIC;
-SIGNAL Encendido_tb:STD_LOGIC;
-SIGNAL Indica_On_tb:STD_LOGIC;
-SIGNAL Estado_out_tb:STD_LOGIC_VECTOR(3 downto 0);
-SIGNAL Zero_N_tb:STD_LOGIC;
-SIGNAL Display_number_tb:STD_LOGIC_VECTOR(6 downto 0);
-SIGNAL Display_selection_tb:STD_LOGIC_VECTOR(7 downto 0);
-BEGIN
-unidad1: TOP PORT MAP(
-    Reset=>Reset_tb,
-    Corto=>Corto_tb,
-    Largo=>Largo_tb,
-    Latte=>Latte_tb,
-    Cortado=>Cortado_tb,
-    Encendido=>Encendido_tb,
-    Clk=>Clk_tb,    
-    Bomba_Led=>Bomba_Led_tb,
-    Leche_Led=>Leche_Led_tb,
-    Indica_On=>Indica_On_tb, 
-    Estado_out=>Estado_out_tb,
-    Zero_N=>ZERO_N_tb,
-    Display_number=>Display_number_tb,
-    Display_selection=>Display_selection_tb   
-);
-Clk_tb <= not Clk_tb after 10 ns;
-PROCESS 
-BEGIN
-Encendido_tb<='1';
-Cortado_tb<='1';
-Wait for 100 ns;
-Cortado_tb<='0';
-Wait for 1000ns;
-ASSERT false
-REPORT "Simulacion finalizada. Test superado."
-SEVERITY FAILURE;
-END PROCESS;
+     COMPONENT TOP IS
+          port(
+                Reset, Clk, Corto, Largo, Latte, Cortado, Encendido : in std_logic;
+                Bomba_Led,Leche_Led, Indica_On : out std_logic;
+                Estado_out: out std_logic_vector(3 downto 0);
+                ZERO_N: out std_logic ;        
+                Display_number:out std_logic_vector(6 downto 0);
+                Display_selection:out std_logic_vector(7 downto 0)     
+              ); 
+     END COMPONENT;    
+     SIGNAL Reset_tb: STD_LOGIC:='0';
+     SIGNAL Clk_tb:STD_LOGIC:= '0';
+     SIGNAL Corto_tb:STD_LOGIC;
+     SIGNAL Largo_tb:STD_LOGIC;
+     SIGNAL Latte_tb:STD_LOGIC;
+     SIGNAL Cortado_tb:STD_LOGIC;
+     SIGNAL Bomba_Led_tb:STD_LOGIC;
+     SIGNAL Leche_Led_tb:STD_LOGIC;
+     SIGNAL Encendido_tb:STD_LOGIC;
+     SIGNAL Indica_On_tb:STD_LOGIC;
+     SIGNAL Estado_out_tb:STD_LOGIC_VECTOR(3 downto 0);
+     SIGNAL Zero_N_tb:STD_LOGIC;
+     SIGNAL Display_number_tb:STD_LOGIC_VECTOR(6 downto 0);
+     SIGNAL Display_selection_tb:STD_LOGIC_VECTOR(7 downto 0);
+          BEGIN
+               unidad1: TOP PORT MAP(
+                                       Reset=>Reset_tb,
+                                       Corto=>Corto_tb,
+                                       Largo=>Largo_tb,
+                                       Latte=>Latte_tb,
+                                       Cortado=>Cortado_tb,
+                                       Encendido=>Encendido_tb,
+                                       Clk=>Clk_tb,    
+                                       Bomba_Led=>Bomba_Led_tb,
+                                       Leche_Led=>Leche_Led_tb,
+                                       Indica_On=>Indica_On_tb, 
+                                       Estado_out=>Estado_out_tb,
+                                       Zero_N=>ZERO_N_tb,
+                                       Display_number=>Display_number_tb,
+                                       Display_selection=>Display_selection_tb   
+                                    );
+     Clk_tb <= not Clk_tb after 10 ns;
+          PROCESS 
+               BEGIN
+                    Encendido_tb<='1';
+                    Cortado_tb<='1';
+                    Wait for 100 ns;
+                    Cortado_tb<='0';
+                    Wait for 1000ns;
+                    ASSERT false
+                    REPORT "Simulacion finalizada. Test superado."
+                    SEVERITY FAILURE;
+          END PROCESS;
 END BEHAVIORAL;
