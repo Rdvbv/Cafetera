@@ -1,112 +1,153 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity top_cafetera is
-  Port (
-        enable: in std_logic;
-        reset_top: in std_logic;
-        clock_top: in std_logic;
-        seleccion: out std_logic_vector(4 downto 0)
-	boton: in std_logic;
-         );
-end top_cafetera;
+entity TOP is
+    port(
+        Reset, Clk, Corto, Largo,Latte, Cortado, Encendido : in std_logic;
+        up, down: in std_logic;
+        Bomba_Led,Leche_Led, Indica_On : out std_logic;
+        Estado_out: out std_logic_vector(3 downto 0);
+        ZERO_N: out std_logic ;        
+        Display_number:out std_logic_vector(6 downto 0);
+        Display_selection:out std_logic_vector(7 downto 0); 
+        q_out: out STD_LOGIC_VECTOR(4 downto 0)
+        ); 
+end TOP;
 
-
-architecture behavioral of top_cafetera is
-
-COMPONENT MaquinaDeEstados IS 
-        PORT(
-               boton_c,boton_l,boton_latte,boton_cortado,boton_choco,reset, clk : in std_logic;
-	       --presente: in std_logic;
-               led_corto,led_largo,led_cortado,led_latte,led_choco,led_espera,led_listo, led_leche, led_azucar: out std_logic;    
+architecture Behavioral of TOP is
+        COMPONENT fdivider IS
+            generic ( MODULE: positive := 100 );
+            port (
+            RESET : in std_logic;
+            CLK : in std_logic;
+            CE_OUT: out std_logic
+            );
+        END COMPONENT;
+        COMPONENT Display_azucar is 
+        port(
+           clk_azucar : in STD_LOGIC;                      
+           up : in STD_LOGIC;                       
+           down : in STD_LOGIC;                     
+           clr: in STD_LOGIC;                       
+           LOAD_N: in STD_LOGIC;                    
+           q_out: out STD_LOGIC_VECTOR(5-1 downto 0)  
         );
-END COMPONENT;
- 
- COMPONENT contador
-	GENERIC (max:integer:=30);
-	PORT(
-		clk : IN std_logic;
-		rst : IN std_logic;
-		enable : IN std_logic;          
-		count : OUT std_logic_vector(4 downto 0);
-		salida : OUT std_logic
-		);
-	END COMPONENT;
-	
-COMPONENT Debouncer is
+        end component;
+        COMPONENT MaquinaEstados IS 
+        PORT(
+               Reset, Clk, Corto, Largo,Latte, Cortado, Encendido : in std_logic;
+               Siguiente:in std_logic;
+               Bomba_Led, Leche_Led, Indica_On : out std_logic;
+               Estado_out: out std_logic_vector(3 downto 0);
+               tiempo_decenas_salida: out  std_logic_vector(3 downto 0);
+               tiempo_unidades_salida: out std_logic_vector(3 downto 0);
+               Load_N:out std_logic
+        );
+        END COMPONENT;
+        COMPONENT Contador IS
+            generic(width_t: positive:=8);
+            Port ( 
+                   Reset: in STD_LOGIC;
+                   CLK_master: in STD_LOGIC;
+                   ce_N: in STD_LOGIC;
+                   LOAD_N: in std_logic;
+                   Estado: in std_logic_vector(3 downto 0);
+                   unidades: in STD_LOGIC_VECTOR (3 downto 0);
+                   decenas: in STD_LOGIC_VECTOR (3 downto 0);
+                   display_number: out std_logic_vector (6 downto 0);--numero
+                   display_selection: out std_logic_vector (7 downto 0);--selección del display.
+                   ZERO_N: out STD_LOGIC
+                   );
+        END COMPONENT;  
+        COMPONENT Debouncer is
             PORT(
                 clk: IN std_logic;
                 rst: IN STD_LOGIC;
                 btn_in: IN STD_LOGIC;
                 btn_out: OUT STD_LOGIC
                 );
-END COMPONENT;
-
-COMPONENT sincronizador is
-	    PORT(
-	     clk: IN std_logic;
-	     sync_in: IN std_logic;
-	     sync_out: OUT STD_LOGIC
-	     );
-END COMPONENT;	    
-
-signal btn_in: std_logic;
-signal btn_out: std_logic;
-signal boton_c: std_logic;
-signal boton_l: std_logic;
-signal boton_latte: std_logic;
-signal boton_cortado: std_logic;
-signal boton_choco: std_logic;
-signal led_corto: std_logic;
-signal led_largo: std_logic;
-signal led_latte: std_logic;
-signal led_cortado: std_logic;
-signal led_choco: std_logic;
-signal led_espera: std_logic;
-signal led_leche: std_logic;
-signal led_azucar: std_logic;
-signal led_listo: std_logic;
-signal sync_in: std_logic;
-signal sync_out: std_logic;
-
-
+        END COMPONENT;
+        COMPONENT Sincronizador IS
+        Port (
+        sync_in: IN STD_LOGIC;
+        clk: IN STD_LOGIC;
+        sync_out: OUT STD_LOGIC
+        );
+        END COMPONENT;   
+             
+   
+        SIGNAL tiempo_dec:std_logic_vector(3 downto 0);
+        SIGNAL tiempo_uni:std_logic_vector(3 downto 0);     
+        SIGNAL load_int:std_logic;        
+        SIGNAL Sig_int:std_logic;
+        SIGNAL Zero_int:std_logic; 
+        SIGNAL CE_N_int:std_logic;
+        SIGNAL Estado_int:std_logic_vector(3 downto 0);  
+        SIGNAL Clk_2:std_logic; 
+        SIGNAL Reset_out:std_logic;  
+        SIGNAL btn_in: std_logic;
+        SIGNAL btn_out: std_logic;                      
 begin
-
-
-maquina: MaquinaDeEstados PORT MAP (clk=>clock_top,
-                    reset=>reset_top,
-		    clk=>clock;
-		    boton_c=> boton_c,
-		    boton_l=> boton_l,
-		    led_corto => led_corto, 
-		    led_largo =>led_largo,
-		    led_espera => led_espera,
-		    led_listo => led_listo,
-		    led_cortado=> led_cortado,
-		    led_latte=> led_latte,
-		    led_choco=>led_choco,
-		    led_leche=> led_leche,
-		    led_azucar=> led_azucar,
-                    );
-
-contador: contador PORT MAP (clk=>clock_top,
-                    rst=>reset_top,
-                    enable=> enable,
-                    salida =>salida_top,
-		    count => seleccion
-                    );
-		    
-debouncer: Debouncer PORT MAP(
-                clk => clk,
-                rst => rst,
-                btn_in => btn_in,
-                btn_out =>btn_out
-                );
-
-sincronizador: sincronizador PORT MAP(
-clk => clk,
-sync_in => sync_in,
-sync_out =>sync_out
-);
-
-end Behavioral;
+        Zero_N<=Zero_int;
+        Sig_int<= not(ZERO_int);
+        CE_N_int<=not encendido; 
+        Estado_out<=Estado_int;            
+        Maquina: MaquinaEstados 
+	PORT map(
+		 tiempo_unidades_salida=> tiempo_uni,
+		 tiempo_decenas_salida=>tiempo_dec,
+		 reset=>Reset,
+		 Siguiente=>Sig_int,
+		 Clk=>Clk_2,
+		 Corto=>Corto,
+		 Largo=>Largo,
+		 Latte=>Latte,
+		 Cortado=>Cortado,
+		 Estado_out=>Estado_int,
+		 Encendido=>Encendido,
+		 Bomba_Led=>Bomba_Led,
+		 Leche_Led=>Leche_Led,
+		 Indica_On=>Indica_On,
+		 Load_N=>load_int
+        ); 
+        Azucar: Display_azucar 
+	PORT MAP(
+            clk_azucar=>CLK,
+            up=>up,
+            down=>down,
+            clr=>Reset,
+            LOAD_N=>'1',
+            q_out=>q_out
+        );       
+        Counter: Contador 
+	     PORT MAP(
+		Reset=>Reset,
+		CLK_master=>Clk,
+		ce_N=>Ce_N_int,
+		LOAD_N=>load_int,
+		Estado=>Estado_int,
+		unidades=>tiempo_uni,
+		decenas=>tiempo_dec,
+		display_number=>display_number,
+		display_selection=>display_selection,
+		ZERO_N=>zero_int
+	    );
+        fdiv: fdivider
+	GENERIC MAP(module=>10)--100000 --2 --100000 1 ms 
+		PORT MAP(
+		     clk=>Clk,
+		     reset=>reset,
+		     ce_out=>clk_2); 
+       deb: Debouncer 
+		PORT MAP(
+			clk => clk,
+			rst => Reset,
+			btn_in => btn_in,
+			btn_out => btn_out
+                );              
+       sincro: Sincronizador 
+		PORT MAP(
+			sync_in=>Reset,
+			clk=>Clk,
+			sync_out=>Reset_out );  
+		end Behavioral;
