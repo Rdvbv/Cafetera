@@ -1,0 +1,69 @@
+--Módulo final 
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Display_azucar is
+    Port(
+      Reset: in std_logic;
+      clk_azucar : in STD_LOGIC;                      
+      up : in STD_LOGIC;                       
+      down : in STD_LOGIC;                     
+      clr: in STD_LOGIC;                       
+      LOAD_N: in STD_LOGIC;                    
+      q_out: out STD_LOGIC_VECTOR(5-1 downto 0)
+    );
+end Display_azucar;
+
+architecture Behavioral of Display_azucar is
+    COMPONENT Azucar IS
+    Port(
+      clk : in STD_LOGIC;                        
+      up : in STD_LOGIC;                         
+      down : in STD_LOGIC;                       
+      clr: in STD_LOGIC;                         
+      LOAD_N: in STD_LOGIC;                      
+      q_out: out STD_LOGIC_VECTOR(3-1 downto 0)
+    );
+    end component;
+    COMPONENT Led_Azucar IS
+    Port(
+         vector_entrada : in STD_LOGIC_VECTOR(3-1 downto 0);
+         vector_salida : out STD_LOGIC_VECTOR(5-1 downto 0);
+         clk: in STD_LOGIC                         
+    );
+    end component;
+   COMPONENT fdivider IS
+         generic(module:positive);
+          Port (  clk : in STD_LOGIC;
+                  reset : in STD_LOGIC;
+                  ce_out : out STD_LOGIC);
+    END COMPONENT;
+    
+    SIGNAL Q_OUT_S: STD_LOGIC_VECTOR(3-1 DOWNTO 0); 
+    SIGNAL clk_1ms:std_logic;
+    
+    
+begin
+    AZUC: Azucar 
+    PORT MAP(
+       clk=>clk_1ms,
+       up=>UP,
+       down=>DOWN,
+       clr=>CLR,
+       LOAD_N=>LOAD_N,
+       q_out=>Q_OUT_S
+    );
+    
+    led: Led_Azucar
+    PORT MAP(
+        vector_entrada=>Q_OUT_S,
+        clk=>clk_1ms,
+        Vector_salida=>q_out
+    );
+    clk1ms: fdivider 
+            GENERIC MAP( module=>100000000)
+            PORT MAP(
+                 clk=>Clk_azucar,
+                 reset=>reset,
+                 ce_out=>clk_1ms); 
+end Behavioral;
