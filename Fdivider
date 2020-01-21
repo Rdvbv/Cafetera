@@ -13,22 +13,20 @@ end fdivider;
 architecture behavioral of fdivider is
   begin
     process (RESET, CLK)
-      subtype count_range is integer range 0 to
-      module - 1;
+      subtype count_range is integer range 0 to module - 1;
       variable count: count_range;
         begin
             if RESET = '1' then
                count := count_range'high;
                CE_OUT <= '0';
-               elsif rising_edge(CLK) then
+            elsif rising_edge(CLK) then
                CE_OUT <= '0';
-
-               if count /= 0 then
-                  count := count - 1;
-               else
-                  CE_OUT <= '1';
-                  count := count_range'high;
-               end if;
+                 if count /= 0 then
+                    count := count - 1;
+                 else
+                    CE_OUT <= '1';
+                    count := count_range'high;
+                 end if;
             end if;
     end process;
   end behavioral;
