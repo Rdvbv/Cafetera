@@ -1,4 +1,3 @@
---Módulo final 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -10,7 +9,7 @@ entity Display_azucar is
       down : in STD_LOGIC;                     
       clr: in STD_LOGIC;                       
       LOAD_N: in STD_LOGIC;                    
-      q_out: out STD_LOGIC_VECTOR(5-1 downto 0)
+      q_out: out STD_LOGIC_VECTOR(4 downto 0)
     );
 end Display_azucar;
 
@@ -22,13 +21,13 @@ architecture Behavioral of Display_azucar is
       down : in STD_LOGIC;                       
       clr: in STD_LOGIC;                         
       LOAD_N: in STD_LOGIC;                      
-      q_out: out STD_LOGIC_VECTOR(3-1 downto 0)
+      q_out: out STD_LOGIC_VECTOR(2 downto 0)
     );
     end component;
     COMPONENT Led_Azucar IS
     Port(
-         vector_entrada : in STD_LOGIC_VECTOR(3-1 downto 0);
-         vector_salida : out STD_LOGIC_VECTOR(5-1 downto 0);
+         vector_entrada : in STD_LOGIC_VECTOR(2 downto 0);
+         vector_salida : out STD_LOGIC_VECTOR(4 downto 0);
          clk: in STD_LOGIC                         
     );
     end component;
@@ -39,7 +38,7 @@ architecture Behavioral of Display_azucar is
                   ce_out : out STD_LOGIC);
     END COMPONENT;
     
-    SIGNAL Q_OUT_S: STD_LOGIC_VECTOR(3-1 DOWNTO 0); 
+    SIGNAL Q_OUT_S: STD_LOGIC_VECTOR(2 DOWNTO 0); 
     SIGNAL clk_1ms:std_logic;
     
     
