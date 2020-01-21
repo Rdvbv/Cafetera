@@ -197,7 +197,7 @@ architecture Behavioral of MaquinaEstados is
                 tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
                 Load_N<='0';
                 Estado_out<="1000";         
-            when Trans_latte=>
+            when Listo_latte=>
                 Bomba_Led<='1';
                 Indica_On<='1';
                 Leche_Led<='0';
@@ -211,7 +211,7 @@ architecture Behavioral of MaquinaEstados is
                 tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
                 Load_N<='0';
                 Estado_out<="1100"; 
-           when Listo_Latte=>
+           when Trans_Latte=>
                 Bomba_Led<='0';
                 Indica_On<='1';
                 Leche_Led<='1';
@@ -250,5 +250,4 @@ architecture Behavioral of MaquinaEstados is
                  Load_N<='1';             
          end case;
    end process;       
-end Behavioral;     
-         
+end Behavioral;   
