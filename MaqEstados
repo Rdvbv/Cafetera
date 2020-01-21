@@ -120,16 +120,16 @@ architecture Behavioral of MaquinaEstados is
         if Siguiente='0' then
           next_state<=Trans_latte;
         end if;
-      when Leche_latte=>
-        if Siguiente='0' then
-         next_state<=Listo_Latte;
-        end if;                 
       when Trans_latte=>
         if Siguiente='1' then
           next_state<=Leche_latte;
         elsif Encendido='0' then 
           next_state <= Apagado;
         end if;
+      when Leche_latte=>
+        if Siguiente='0' then
+         next_state<=Listo_Latte;
+        end if;                 
       when Listo_Latte=>
         if Siguiente='1' then 
           next_state<= Espera;
@@ -196,29 +196,30 @@ architecture Behavioral of MaquinaEstados is
                 tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas); 
                 tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
                 Load_N<='0';
-                Estado_out<="1000";         
-            when Listo_latte=>
+                Estado_out<="1000";   
+            when Trans_Latte=>
                 Bomba_Led<='1';
                 Indica_On<='1';
                 Leche_Led<='0';
-                tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas);
-                tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
-                Estado_out<="0110";
-                Load_N<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas); 
+                tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
+                Estado_out<="1010";
+                Load_N<='1';       
            when Leche_latte=>
                 Indica_On<='1';
                 tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas); --echando leche
                 tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
                 Load_N<='0';
                 Estado_out<="1100"; 
-           when Trans_Latte=>
+           when Listo_latte=>
                 Bomba_Led<='0';
                 Indica_On<='1';
                 Leche_Led<='1';
-                tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas); 
-                tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
-                Estado_out<="1010";
-                Load_N<='1';                
+                tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
+                Estado_out<="0110";
+                Load_N<='1';
+                         
         --cortado  
             when Preparando_cortado=>
                  Indica_On<='1';
