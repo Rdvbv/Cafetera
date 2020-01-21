@@ -15,7 +15,7 @@
 
     WITH code SELECT
       led <= 
-             "0000001" WHEN "0000",
+             "0000001" WHEN "0000", -- 0 codificado con  ánodo común
              "1001111" WHEN "0001",
              "0010010" WHEN "0010",
              "0000110" WHEN "0011",
