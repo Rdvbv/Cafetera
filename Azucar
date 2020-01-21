@@ -4,12 +4,12 @@ use IEEE.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 entity Azucar is
-    Port (  clk : in STD_LOGIC;
-            up : in STD_LOGIC;
-            down : in STD_LOGIC;
-            clr: in STD_LOGIC;
+    Port (  clk   : in STD_LOGIC;
+            up    : in STD_LOGIC;
+            down  : in STD_LOGIC;
+            clr   : in STD_LOGIC;
             LOAD_N: in STD_LOGIC;
-            q_out: out STD_LOGIC_VECTOR(3-1 downto 0));
+            q_out : out STD_LOGIC_VECTOR(2 downto 0));
 end Azucar;
 
 architecture Behavioral of Azucar is
@@ -35,4 +35,3 @@ begin
    end process;
   q_out<=std_logic_vector(q_i);   
 end Behavioral;
-end Behavioral; 
