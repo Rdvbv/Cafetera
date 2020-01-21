@@ -2,242 +2,253 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.std_logic_unsigned.all;
 use ieee.numeric_std.all;
-  entity MaquinaEstados is
+entity MaquinaEstados is
 
     Port(
-            Reset, Clk, Corto, Largo,Latte,Cortado, Encendido : in std_logic;
-            Siguiente:in std_logic;
-            Bomba_Led, Leche_Led, Indica_On : out std_logic;
-            Estado_out: out std_logic_vector(3 downto 0);
-            tiempo_decenas_salida: out  std_logic_vector(3 downto 0);
-            tiempo_unidades_salida: out std_logic_vector(3 downto 0);
-            Load_N:out std_logic
-        );
-  end MaquinaEstados;
+        Reset, Clk, Corto, Largo,Latte,Cortado, Encendido : in std_logic;
+        Siguiente:in std_logic;
+        Bomba_Led, Leche_Led, Indica_On : out std_logic;
+        Estado_out: out std_logic_vector(3 downto 0);
+        tiempo_decenas_salida: out  std_logic_vector(3 downto 0);
+        tiempo_unidades_salida: out std_logic_vector(3 downto 0);
+        Load_N:out std_logic
+      );
+end MaquinaEstados;
 
 architecture Behavioral of MaquinaEstados is
-        constant tiempo_C_decenas: unsigned(3 downto 0):= "0000"; --0
-        constant tiempo_C_unidades: unsigned(3 downto 0) :="1000";--8
-        constant tiempo_L_decenas: unsigned(3 downto 0) :="0001";--1
-        constant tiempo_L_unidades: unsigned(3 downto 0) :="0101";--5
-        constant tiempo_CL_decenas: unsigned(3 downto 0):= "0001"; --1
-        constant tiempo_CL_unidades: unsigned(3 downto 0) :="0101";--5
-        constant tiempo_COR_decenas: unsigned(3 downto 0) :="0001";--1
-        constant tiempo_COR_unidades: unsigned(3 downto 0) :="0010";--2
-        constant tiempo_L_CL_decenas: unsigned(3 downto 0):= "0001"; --1   tiempo de leche en latte
-        constant tiempo_L_CL_unidades: unsigned(3 downto 0) :="0000";--0
-        constant tiempo_L_COR_decenas: unsigned(3 downto 0) :="0000";-- tiempo de leche en cortado
-        constant tiempo_L_COR_unidades: unsigned(3 downto 0) :="0101";--5
+    constant tiempo_C_decenas: unsigned(3 downto 0):= "0000"; --0
+    constant tiempo_C_unidades: unsigned(3 downto 0) :="1000";--8
+    constant tiempo_L_decenas: unsigned(3 downto 0) :="0001";--1
+    constant tiempo_L_unidades: unsigned(3 downto 0) :="0101";--5
+    constant tiempo_CL_decenas: unsigned(3 downto 0):= "0001"; --1
+    constant tiempo_CL_unidades: unsigned(3 downto 0) :="0101";--5
+    constant tiempo_COR_decenas: unsigned(3 downto 0) :="0001";--1
+    constant tiempo_COR_unidades: unsigned(3 downto 0) :="0010";--2
+    constant tiempo_L_CL_decenas: unsigned(3 downto 0):= "0001"; --1   tiempo de leche en latte
+    constant tiempo_L_CL_unidades: unsigned(3 downto 0) :="0000";--0
+    constant tiempo_L_COR_decenas: unsigned(3 downto 0) :="0000";-- tiempo de leche en cortado
+    constant tiempo_L_COR_unidades: unsigned(3 downto 0) :="0101";--5
     
   type estado is (Apagado, Espera , Listo_corto, Listo_largo,Preparando_corto,Preparando_largo,Trans_latte,Trans_cortado,Preparando_latte,Preparando_cortado,Listo_Latte,Listo_Cortado,Leche_latte,Leche_cortado);
-    signal state_register: estado;
-    signal next_state: estado; 
-    signal flag: integer;   
-        begin
-            status_register: process(Clk)
-                begin
-                    if rising_edge(Clk) then
-                        if Reset = '1' then 
-                            state_register <= Espera;           
-                        else
-                            state_register <= next_state;
-                        end if;
-                    end if;
-                end process;
+  signal state_register: estado;
+  signal next_state: estado; 
+  signal flag: integer;   
+  begin
+    status_register: process(Clk)
+    begin
+      if rising_edge(Clk) then
+        if Reset = '1' then 
+          state_register <= Espera;           
+        else
+          state_register <= next_state;
+        end if;
+      end if;
+    end process;
     
- Siguiente_Estado: process(Reset,state_register, Corto, Largo, Encendido,Latte,Cortado,Siguiente)
-        begin
-            next_state <= state_register;       
+    Siguiente_Estado: process(Reset,state_register, Corto, Largo, Encendido,Latte,Cortado,Siguiente)
+    begin
+      next_state <= state_register;       
                
-            case state_register is 
-                when Apagado =>
-                    if Encendido = '1' then
-                        next_state <= Espera;
-                    elsif Encendido='0' then 
-                        next_state <= Apagado;
-                    end if;
-                when Espera=> 
-                    if Corto= '1' then                         
-                        next_state<= Preparando_corto;
-                    elsif Largo = '1' then                         
-                        next_state <= Preparando_largo;
-                    elsif Latte='1' then 
-                        next_state <= Preparando_latte;
-                    elsif Cortado = '1' then 
-                        next_state <= Preparando_cortado;
-                    elsif Encendido='0' then 
-                        next_state <= Apagado;
-                    end if;
-                when Listo_corto=>
-                    if Siguiente = '1' then 
-                        next_state <= Espera;
-                    elsif Encendido='0' then 
-                        next_state <= Apagado;
-                    end if;                      
-                when Listo_largo=>
-                    if Siguiente = '1' then 
-                        next_state <= Espera;
-                    elsif Encendido='0' then 
-                        next_state <=Apagado;
-                    end if;                               
-                when Preparando_corto=>
-                    if Siguiente = '0' then --
-                        next_state <=Listo_corto;
-                    end if;
+      case state_register is 
+        when Apagado =>
+          if Encendido = '1' then
+            next_state <= Espera;
+          elsif Encendido='0' then 
+            next_state <= Apagado;
+          end if;
+        when Espera=> 
+          if Corto= '1' then                         
+            next_state<= Preparando_corto;
+          elsif Largo = '1' then                         
+            next_state <= Preparando_largo;
+          elsif Latte='1' then 
+            next_state <= Preparando_latte;
+          elsif Cortado = '1' then 
+            next_state <= Preparando_cortado;
+          elsif Encendido='0' then 
+            next_state <= Apagado;
+          end if;
+          
+   --corto    
+      when Preparando_corto=>
+        if Siguiente = '0' then 
+          next_state <=Listo_corto;
+        end if;
+      when Listo_corto=>
+        if Siguiente = '1' then 
+          next_state <= Espera;
+        elsif Encendido='0' then 
+          next_state <= Apagado;
+        end if; 
+        
+   --largo
+      when Preparando_largo=>
+        if Siguiente = '0' then
+          next_state<=Listo_largo;
+        end if;                       
+      when Listo_largo=>
+        if Siguiente = '1' then 
+          next_state <= Espera;
+        elsif Encendido='0' then 
+          next_state <=Apagado;
+        end if;                               
+     
+   --cortado
+      when Preparando_cortado=>
+        if Siguiente='0' then
+          next_state<=Trans_cortado;
+        end if ;
+      when Trans_cortado=>  --para poder cambiaa del cafe a leche comodamente
+        if Siguiente='1' then
+          next_state<=Leche_cortado;
+        elsif Encendido='0' then 
+          next_state <= Apagado;
+        end if;
+      when Leche_cortado=>
+        if Siguiente='0' then
+          next_state<=Listo_Cortado;
+        end if;   
+      when Listo_Cortado=>
+        if Siguiente='1'then 
+          next_state<= Espera;
+        elsif Encendido='0' then 
+          next_state <=Apagado;
+        end if;  
+        
+     --Latte                
+      when Preparando_latte=>
+        if Siguiente='0' then
+          next_state<=Trans_latte;
+        end if;
+      when Leche_latte=>
+        if Siguiente='0' then
+         next_state<=Listo_Latte;
+        end if;                 
+      when Trans_latte=>
+        if Siguiente='1' then
+          next_state<=Leche_latte;
+        elsif Encendido='0' then 
+          next_state <= Apagado;
+        end if;
+      when Listo_Latte=>
+        if Siguiente='1' then 
+          next_state<= Espera;
+        elsif Encendido='0' then 
+          next_state <=Apagado;
+        elsif Reset = '1' then 
+          next_state <=Espera;
+        end if;
 
-                when Preparando_largo=>
-                    if Siguiente = '0' then
-                        next_state<=Listo_largo;
-                    end if;
-                when Trans_latte=>
-                    if Siguiente='1' then
-                        next_state<=Leche_latte;
-                    elsif Encendido='0' then 
-                        next_state <= Apagado;
-                    end if;
-                when Trans_cortado=>
-                    if Siguiente='1' then
-                        next_state<=Leche_cortado;
-                    elsif Encendido='0' then 
-                        next_state <= Apagado;
-                    end if;
-                when Preparando_latte=>
-                    if Siguiente='0' then
-                        next_state<=Trans_latte;
-                    end if;
-                when Preparando_cortado=>
-                    if Siguiente='0' then
-                        next_state<=Trans_cortado;
-                    end if ;
-                when Listo_Latte=>
-                    if Siguiente='1' then 
-                        next_state<= Espera;
-                    elsif Encendido='0' then 
-                        next_state <=Apagado;
-                    elsif Reset = '1' then 
-                        next_state <=Espera;
-                    end if;
-                when Listo_Cortado=>
-                    if Siguiente='1'then 
-                        next_state<= Espera;
-                    elsif Encendido='0' then 
-                        next_state <=Apagado;
-                    end if;  
-                when Leche_latte=>
-                    if Siguiente='0' then
-                        next_state<=Listo_Latte;
-                    end if;
-                when Leche_cortado=>
-                    if Siguiente='0' then
-                        next_state<=Listo_Cortado;
-                    end if;
-                when others =>
-                        next_state <= Apagado;      
-           
-            end case;       
-      end process; 
+      when others =>
+        next_state <= Apagado;      
+    end case;       
+  end process; 
 
- salidas:process(state_register)
+  salidas:process(state_register)
    begin
-            case state_register is
-                when Apagado=>
-                    Bomba_Led<='0';
-                    Indica_On<='0';
-                    Leche_Led<='0';              
-                    Estado_out<="0000";               
-                when Espera=>
-                    Bomba_Led<='0';
-                    Indica_On<='1';
-                    Leche_Led<='0';
-                    Estado_out<="0001";
-                    tiempo_decenas_salida<=(others=>'0');
-                    tiempo_unidades_salida<=(others=>'0');
-                    Load_N<='0';              
-           
-                when Listo_corto=>
-                    Bomba_Led<='1';
-                    Indica_On<='1';
-                    Leche_Led<='0';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_C_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_C_unidades);
-                    Estado_out<="0010";
-                    Load_N<='1';
-                when Listo_largo=>
-                    Bomba_Led<='1';
-                    Indica_On<='1';
-                    Leche_Led<='0';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_L_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_L_unidades);
-                    Estado_out<="0011";
-                    Load_N<='1';
-                when Preparando_corto=>
-                    Indica_On<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_C_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_C_unidades);
-                    Load_N<='0';
-                    Estado_out<="0100";
-                when Preparando_largo=>
-                    Indica_On<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_L_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_L_unidades);
-                    Load_N<='0';
-                    Estado_out<="0101";
-                when Trans_latte=>
-                    Bomba_Led<='1';
-                    Indica_On<='1';
-                    Leche_Led<='0';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
-                    Estado_out<="0110";
-                    Load_N<='1';
-                when Trans_cortado=>
-                    Bomba_Led<='1';
-                    Indica_On<='1';
-                    Leche_Led<='0';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_COR_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_COR_unidades);
-                    Estado_out<="0111";
-                    Load_N<='1';
-              when Preparando_latte=>
-                    Indica_On<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
-                    Load_N<='0';
-                    Estado_out<="1000"; 
-              when Preparando_cortado=>
-                    Indica_On<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_COR_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_COR_unidades);
-                    Load_N<='0';
-                    Estado_out<="1001";
-              when Listo_Latte=>
-                    Bomba_Led<='0';
-                    Indica_On<='1';
-                    Leche_Led<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
-                    Estado_out<="1010";
-                    Load_N<='1';
-              when Listo_Cortado=>
-                    Bomba_Led<='0';
-                    Indica_On<='1';
-                    Leche_Led<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_L_COR_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_L_COR_unidades);
-                    Estado_out<="1011";
-                    Load_N<='1'; 
-              when Leche_latte=>
-                    Indica_On<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
-                    Load_N<='0';
-                    Estado_out<="1100";  
-               when Leche_cortado=>
-                    Indica_On<='1';
-                    tiempo_decenas_salida<= std_logic_vector(tiempo_L_COR_decenas);
-                    tiempo_unidades_salida<=std_logic_vector(tiempo_L_COR_unidades);
-                    Load_N<='0';
-                    Estado_out<="1101";               
-            end case;
-     end process;       
+        case state_register is
+            when Apagado=>
+                Bomba_Led<='0';
+                Indica_On<='0';
+                Leche_Led<='0';              
+                Estado_out<="0000";               
+            when Espera=>
+                Bomba_Led<='0';
+                Indica_On<='1';
+                Leche_Led<='0';
+                Estado_out<="0001";
+                tiempo_decenas_salida<=(others=>'0');
+                tiempo_unidades_salida<=(others=>'0');
+                Load_N<='0';              
+        --corto  
+            when Preparando_corto=>  --eleccion de corto
+                Indica_On<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_C_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_C_unidades);
+                Load_N<='0';
+                Estado_out<="0100";         
+            when Listo_corto=>   -- se fabrica el corto
+                Bomba_Led<='1';
+                Indica_On<='1';
+                Leche_Led<='0';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_C_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_C_unidades);
+                Estado_out<="0010";
+                Load_N<='1';
+       --largo     
+            when Preparando_largo=>
+                Indica_On<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_L_decenas); --echando cafe
+                tiempo_unidades_salida<=std_logic_vector(tiempo_L_unidades);
+                Load_N<='0';
+                Estado_out<="0101";           
+            when Listo_largo=>
+                Bomba_Led<='1';
+                Indica_On<='1';
+                Leche_Led<='0';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_L_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_L_unidades);
+                Estado_out<="0011";
+                Load_N<='1';
+        --Latte
+            when Preparando_latte=>
+                Indica_On<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas); 
+                tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
+                Load_N<='0';
+                Estado_out<="1000";         
+            when Trans_latte=>
+                Bomba_Led<='1';
+                Indica_On<='1';
+                Leche_Led<='0';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_CL_decenas);
+                tiempo_unidades_salida<=std_logic_vector(tiempo_CL_unidades);
+                Estado_out<="0110";
+                Load_N<='1';
+           when Leche_latte=>
+                Indica_On<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas); --echando leche
+                tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
+                Load_N<='0';
+                Estado_out<="1100"; 
+           when Listo_Latte=>
+                Bomba_Led<='0';
+                Indica_On<='1';
+                Leche_Led<='1';
+                tiempo_decenas_salida<= std_logic_vector(tiempo_L_CL_decenas); 
+                tiempo_unidades_salida<=std_logic_vector(tiempo_L_CL_unidades);
+                Estado_out<="1010";
+                Load_N<='1';                
+        --cortado  
+            when Preparando_cortado=>
+                 Indica_On<='1';
+                 tiempo_decenas_salida<= std_logic_vector(tiempo_COR_decenas);
+                 tiempo_unidades_salida<=std_logic_vector(tiempo_COR_unidades);
+                 Load_N<='0';
+                 Estado_out<="1001";                               
+            when Trans_cortado=>
+                 Bomba_Led<='1';
+                 Indica_On<='1';
+                 Leche_Led<='0';
+                 tiempo_decenas_salida<= std_logic_vector(tiempo_COR_decenas);
+                 tiempo_unidades_salida<=std_logic_vector(tiempo_COR_unidades);
+                 Estado_out<="0111";
+                 Load_N<='1';
+            when Leche_cortado=>
+                 Indica_On<='1';
+                 tiempo_decenas_salida<= std_logic_vector(tiempo_L_COR_decenas);
+                 tiempo_unidades_salida<=std_logic_vector(tiempo_L_COR_unidades);
+                 Load_N<='0';
+                 Estado_out<="1101";   
+           when Listo_Cortado=>
+                 Bomba_Led<='0';
+                 Indica_On<='1';
+                 Leche_Led<='1';
+                 tiempo_decenas_salida<= std_logic_vector(tiempo_L_COR_decenas);
+                 tiempo_unidades_salida<=std_logic_vector(tiempo_L_COR_unidades);
+                 Estado_out<="1011";
+                 Load_N<='1';             
+         end case;
+   end process;       
 end Behavioral;     
+         
