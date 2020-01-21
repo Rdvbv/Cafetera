@@ -17,26 +17,25 @@ signal q_i: unsigned(3-1 downto 0);
 begin
   process(clk,clr,up,down,load_n)
     begin
-             if clr = '1' then
+     if clr = '1' then
              q_i <= (others => '0');
-             elsif (LOAD_N = '0') then
-                     q_i <="011";
-             elsif (rising_edge(clk)) then
-       if (rising_edge(clk)) then
+     elsif (LOAD_N = '0') then
+             q_i <="011";
+     elsif (rising_edge(clk)) then
            if clr = '1' then
-                q_i <= (others => '0');
-           elsif (LOAD_N = '0') then
+                   q_i <= (others => '0');
+            elsif (LOAD_N = '0') then
                    q_i <="011";
             elsif UP = '1' then
                 if q_i<"101" then
-                q_i <= q_i + 1;
+                   q_i <= q_i + 1;
                 end if;
             elsif DOWN = '1' then 
                 if q_i > "000" then
-                q_i <= q_i - 1;    
+                   q_i <= q_i - 1;    
                 end if;
             end if;
        end if;
    end process;
   q_out<=std_logic_vector(q_i);   
-end Behavioral;
+end Behavioral; 
